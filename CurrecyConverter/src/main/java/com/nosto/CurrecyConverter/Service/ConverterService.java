@@ -5,5 +5,5 @@ import com.nosto.CurrecyConverter.Entity.ConversionEntity;
 
 public interface ConverterService {
 
-    public Object convert(ConversionEntity conversionEntity) throws Exception;
+    public Double convert(ConversionEntity conversionEntity) throws Exception;
 }

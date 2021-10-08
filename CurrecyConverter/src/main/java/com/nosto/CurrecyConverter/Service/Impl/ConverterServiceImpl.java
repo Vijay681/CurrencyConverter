@@ -23,31 +23,36 @@ public class ConverterServiceImpl implements ConverterService {
 
     @Autowired
     ObjectMapper mapper ;
+
     @Value("${baseUrl}")
     private String baseUrl;
 
     @Value("${api_key}")
     private String api_key;
 
+    @Autowired
+    RestTemplate restTemplate;
+
     @Override
-    public Object convert(ConversionEntity conversionEntity) throws Exception {
+    public Double convert(ConversionEntity conversionEntity) throws Exception {
 
         if (!conversionEntity.getSourceCurrency().equals("EUR")) {
             Logger.getAnonymousLogger().info("Only Euro source currency is supported on free subscription plan.");
             throw new Exception("Only Euro source currency is supported on free subscription plan.");
         }
         String url = baseUrl + "?access_key=" + api_key;
-        RestTemplate restTemplate = new RestTemplate();
+
         String jsonResponse = restTemplate.getForObject(url, String.class);
         JsonNode jsonNode = mapper.readTree(jsonResponse);
         JsonNode result = jsonNode.get("rates");
         JsonNode targetCurrencyValue = result.get(conversionEntity.getTargetCurrency());
         if (null == targetCurrencyValue)
         {
-            Logger.getAnonymousLogger().info("Target currency" + conversionEntity.getTargetCurrency() + " is not a valid currency.");
-            throw new CurrencyNotFoundException("Target currency" + conversionEntity.getTargetCurrency() + " is not a valid currency.");
+            Logger.getAnonymousLogger().info("Target currency " + conversionEntity.getTargetCurrency() + " is not a valid currency.");
+            throw new CurrencyNotFoundException("Target currency " + conversionEntity.getTargetCurrency() + " is not a valid currency.");
         }
         Double convertedValue = Double.parseDouble(targetCurrencyValue.toString()) * Integer.parseInt(conversionEntity.getMonetaryValue());
+        Logger.getAnonymousLogger().info("Converted Value "+convertedValue);
         return convertedValue;
     }
 }
